@@ -12,11 +12,16 @@
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.7.5",
 		"@cloudflare/workers-types": "^4.20250327.0",
+		"drizzle-kit": "^0.30.6",
+		"tsx": "^4.19.3",
 		"typescript": "^5.5.2",
 		"vitest": "~3.0.7",
 		"wrangler": "^4.6.0"
 	},
 	"dependencies": {
-		"hono": "^4.7.5"
+		"dotenv": "^16.4.7",
+		"drizzle-orm": "^0.41.0",
+		"hono": "^4.7.5",
+		"zod": "^3.24.2"
 	}
 }
