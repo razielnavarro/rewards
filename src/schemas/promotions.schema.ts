@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
 export const promotionsSchema = z.object({
-    user_id: z.string(),
-    success: z.boolean(),
-    ip: z.string(),
-    country: z.string(),
-    user_agent: z.string(),
+	title: z.string(),
+	description: z.string(), 
+	start_date: z.string(),
+	end_date: z.string(),
+	user_agent: z.string(),
+	status: z.enum(['pending', 'active', 'expired']).optional().default('pending'),
 });
