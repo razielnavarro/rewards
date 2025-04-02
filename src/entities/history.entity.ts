@@ -6,6 +6,7 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 export const history = sqliteTable('history', {
 	...baseEntityColumns,
+	user_id: text(),
 	description: text(),
 	points: text(),
 	pointsBefore: integer(),
