@@ -10,12 +10,12 @@ import {
     integer 
 } from 'drizzle-orm/sqlite-core';
 
-export const promotionsCategory = sqliteTable('promotionCategory', {
+export const promotionsCategory = sqliteTable('promotionsCategory', {
     ...baseEntityColumns,
 	is_multiplier: integer({ mode: 'boolean' }).notNull().default(false),
     amount: integer(),
 });
 
-export const promotionCategoryRelations = relations(promotionsCategory, ({ many }) => ({
+export const promotionsCategoryRelations = relations(promotionsCategory, ({ many }) => ({
 	promotions: many(promotions)
 }));
