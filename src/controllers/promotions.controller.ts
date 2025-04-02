@@ -7,7 +7,7 @@ import { apiKeyMiddleware } from "../middleware";
 
 export const promotionsController = new Hono<Env>();
 
-promotionsController.post("/", apiKeyMiddleware, async (c) => {
+promotionsController.get("/", apiKeyMiddleware, async (c) => {
   const db = drizzle(c.env.DB);
   const data = await c.req.json();
   

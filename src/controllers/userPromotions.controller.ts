@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
-import { userPromotions } from '../entities/userPromotions';
+import { userPromotions } from '../entities/userPromotions.entity';
 import { Env } from '../common/types';
-import { userPromotionsSchema } from '../schemas/userPromotions';
+import { userPromotionsSchema } from '../schemas/userPromotions.schema';
 import { apiKeyMiddleware } from '../middleware';
 
 export const userPromotionsController = new Hono<Env>();
