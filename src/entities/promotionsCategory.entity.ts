@@ -8,7 +8,7 @@ import {
     integer 
 } from 'drizzle-orm/sqlite-core';
 
-export const promotionType = sqliteTable('promotionType', {
+export const promotionCategory = sqliteTable('promotionCategory', {
     ...baseEntityColumns,
 	is_multiplier: integer({ mode: 'boolean' }).notNull().default(false),
     amount: integer(),

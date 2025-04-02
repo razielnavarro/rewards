@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
-import { promotionType } from '../entities/promotionsCategory.entity';
+import { promotionCategory } from '../entities/promotionsCategory.entity';
 import { Env } from '../common/types';
 import { promotionTypeSchema } from '../schemas/promotionsCategory.schema';
 import { apiKeyMiddleware } from '../middleware';
@@ -16,7 +16,7 @@ promotionTypeController.post('/', apiKeyMiddleware, async (c) => {
 		return c.json({ error: parsed.error }, 400);
 	}
 
-	const [record] = await db.insert(promotionType).values(data).returning();
+	const [record] = await db.insert(promotionCategory).values(data).returning();
 	return c.json({ record });
 });
 
