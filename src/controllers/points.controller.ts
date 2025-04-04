@@ -1,4 +1,3 @@
-// File: src/controllers/points.controller.ts
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { Env } from '../common/types';
@@ -10,7 +9,6 @@ import { eq } from 'drizzle-orm';
 
 export const pointsController = new Hono<Env>();
 
-// Endpoint for adding points
 pointsController.post('/add', apiKeyMiddleware, async (c) => {
 	const db = drizzle(c.env.DB);
 	const data = await c.req.json();
@@ -25,7 +23,6 @@ pointsController.post('/add', apiKeyMiddleware, async (c) => {
 	// Calculate the effective points to add using the provided multiplier.
 	const effectiveAmount = amount * multiplier;
 
-	// Retrieve current user balance (assuming one record per user)
 	const [existing] = await db.select().from(userBalance).where(eq(userBalance.user_id, user_id));
 
 	let newBalance: number;
@@ -58,7 +55,7 @@ pointsController.post('/add', apiKeyMiddleware, async (c) => {
 	return c.json({ message: 'Points added successfully', newBalance, multiplierApplied: multiplier });
 });
 
-// Endpoint for redeeming points (remains unchanged)
+// Endpoint for redeeming points
 pointsController.post('/redeem', apiKeyMiddleware, async (c) => {
 	const db = drizzle(c.env.DB);
 	const data = await c.req.json();
