@@ -1,10 +1,11 @@
+import { is } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const promotionsSchema = z.object({
 	title: z.string(),
-	description: z.string(), 
-	start_date: z.string(),
-	end_date: z.string(),
-	user_agent: z.string(),
-	status: z.enum(['pending', 'active', 'expired']).optional().default('pending'),
+	description: z.string(),
+	start_date: z.coerce.number().int().min(0),
+	end_date: z.coerce.number().int().min(0),
+	promotion_category_type: z.enum(['multiplier']).optional().default('multiplier'),
+	is_premium: z.boolean().optional().default(false),
 });

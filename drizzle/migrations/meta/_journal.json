@@ -8,6 +8,13 @@
       "when": 1743778102601,
       "tag": "0000_puzzling_shaman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1743789959469,
+      "tag": "0001_new_hobgoblin",
+      "breakpoints": true
     }
   ]
 }
