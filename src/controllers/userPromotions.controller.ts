@@ -4,7 +4,7 @@ import { userPromotions } from '../entities/userPromotions.entity';
 import { Env } from '../common/types';
 import { userPromotionsSchema } from '../schemas/userPromotions.schema';
 import { apiKeyMiddleware } from '../middleware';
-import { eq } from 'drizzle-orm';
+import { eq, and, gte, lte } from 'drizzle-orm';
 import { promotions } from '../entities/promotions.entity';
 
 export const userPromotionsController = new Hono<Env>();
@@ -29,22 +29,20 @@ userPromotionsController.post('/', apiKeyMiddleware, async (c) => {
 		return c.json({ error: 'User already has an active promotion' }, 400);
 	}
 
-	// Check if the selected promotion exists and is currently active
-	const [promotionRecord] = await db.select().from(promotions).where(eq(promotions.id, promotion_id));
+	// Get current time as a Date object
+	const now = new Date();
+
+	// Query the promotions table, filtering by ID and ensuring the promotion is active.
+	const [promotionRecord] = await db
+		.select()
+		.from(promotions)
+		.where(and(eq(promotions.id, promotion_id), lte(promotions.start_date, now), gte(promotions.end_date, now)));
 
 	if (!promotionRecord) {
-		return c.json({ error: 'Promotion not found' }, 404);
+		return c.json({ error: 'Promotion not found or not active' }, 404);
 	}
 
-	// Get current Unix timestamp
-	const now = Math.floor(Date.now() / 1000);
-
-	// Check that the current time is within the promotion period
-	if (promotionRecord.start_date.getTime() / 1000 > now || promotionRecord.end_date.getTime() / 1000 < now) {
-		return c.json({ error: 'Promotion is not active' }, 400);
-	}
-
-	// Insert the new userPromotion record
+	// Insert the new userPromotion record, since the promotion is active.
 	const [record] = await db.insert(userPromotions).values(parsed.data).returning();
 
 	return c.json({ record });
