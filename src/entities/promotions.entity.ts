@@ -16,5 +16,6 @@ export const promotions = sqliteTable('promotions', {
 		.default(sql`(strftime('%s', 'now'))`)
 		.notNull(),
 	promotion_category_type: text(),
+	amount: integer('amount').notNull().default(1),
 	is_premium: integer('is_premium', { mode: 'boolean' }).notNull().default(false),
 });
