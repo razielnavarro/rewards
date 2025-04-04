@@ -1,0 +1,1 @@
+ALTER TABLE `promotions` ADD `amount` integer DEFAULT 1 NOT NULL;

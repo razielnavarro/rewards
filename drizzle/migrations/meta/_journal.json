@@ -15,6 +15,20 @@
       "when": 1743789959469,
       "tag": "0001_new_hobgoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1743800843952,
+      "tag": "0002_foamy_dreadnoughts",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1743801537811,
+      "tag": "0003_tiresome_meggan",
+      "breakpoints": true
     }
   ]
 }

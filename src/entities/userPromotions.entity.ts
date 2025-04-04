@@ -11,7 +11,7 @@ export const userPromotions = sqliteTable('userPromotions', {
 	user_id: text(),
 	promotion_id: text()
 		.notNull()
-		.references(() => promotions.id),
+		.references(() => promotions.id, { onDelete: 'cascade' }),
 });
 
 export const userPromotionsRelations = relations(userPromotions, ({ one }) => ({
