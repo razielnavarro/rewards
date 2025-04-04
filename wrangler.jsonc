@@ -5,17 +5,17 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "rnb-points",
-	"main": "src/index.ts",
+	"main": "src/app.ts",
 	"compatibility_date": "2025-03-27",
 	"observability": {
 		"enabled": true
 	},
 	"d1_databases": [
 		{
-		  "binding": "DB",
-		  "database_name": "points",
-		  "database_id": "283ea631-e975-49c7-b059-0115e676b7c5",
-		  "migrations_dir": "drizzle/migrations"
+			"binding": "DB",
+			"database_name": "points",
+			"database_id": "283ea631-e975-49c7-b059-0115e676b7c5",
+			"migrations_dir": "drizzle/migrations"
 		}
-	  ]
-	}
+	]
+}
