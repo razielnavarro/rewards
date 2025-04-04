@@ -7,5 +7,6 @@ export const promotionsSchema = z.object({
 	start_date: z.coerce.number().int().min(0),
 	end_date: z.coerce.number().int().min(0),
 	promotion_category_type: z.enum(['multiplier']).optional().default('multiplier'),
+	amount: z.number(),
 	is_premium: z.boolean().optional().default(false),
 });
