@@ -5,25 +5,20 @@ import { Env } from "../common/types";
 import { historySchema } from "../schemas/history.schema";
 import { apiKeyMiddleware } from "../middleware";
 import { getConnInfo } from "hono/cloudflare-workers";
+import { eq } from "drizzle-orm";
 
 export const historyController = new Hono<Env>();
 
-historyController.post("/", apiKeyMiddleware, async (c) => {
+historyController.get("/:userId", apiKeyMiddleware, async (c) => {
   const db = drizzle(c.env.DB);
-  const data = await c.req.json();
-  const customerId = c.get("customerId");
-  const user_agent = c.req.header("User-Agent") || "Unknown";
-  const country = c.req.header("CF-IPCountry") || "Unknown";
-  const ip = getConnInfo(c).remote.address || "Unknown";
-  const inputData = { ...data, user_id: customerId, ip, user_agent, country };
+  const userId = c.req.param("userId");
+
+  const records = await db.select().from(history).where(eq(history.user_id, userId));
   
-  const parsed = historySchema.safeParse(inputData);
-  if (!parsed.success) {
-    return c.json({ error: parsed.error }, 400);
+  if (!records || records.length === 0) {
+    return c.json({ message: "No history records found" }, 404);
   }
   
-  const [record] = await db.insert(history).values(inputData).returning();
-  return c.json({ record });
+  return c.json({ records });
 });
 
-export default historyController;
