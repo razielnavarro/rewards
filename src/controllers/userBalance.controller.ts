@@ -1,23 +1,23 @@
-import { Hono } from 'hono';
-import { drizzle } from 'drizzle-orm/d1';
-import { userBalance } from '../entities/userBalance.entity';
-import { Env } from '../common/types';
-import { userBalanceSchema } from '../schemas/userBalance.schema';
-import { apiKeyMiddleware } from '../middleware';
+import { Hono } from "hono";
+import { drizzle } from "drizzle-orm/d1";
+import { userBalance } from "../entities/userBalance.entity";
+import { Env } from "../common/types";
+import { apiKeyMiddleware } from "../middleware";
+import { eq } from "drizzle-orm";
 
-export const userPointsController = new Hono<Env>();
+export const userBalanceController = new Hono<Env>();
 
-userPointsController.get('/', apiKeyMiddleware, async (c) => {
-	const db = drizzle(c.env.DB);
-	const data = await c.req.json();
+userBalanceController.get("/:userId", apiKeyMiddleware, async (c) => {
+  const db = drizzle(c.env.DB);
+  const userId = c.req.param("userId");
 
-	const parsed = userBalanceSchema.safeParse(data);
-	if (!parsed.success) {
-		return c.json({ error: parsed.error }, 400);
-	}
+  const [record] = await db.select().from(userBalance).where(eq(userBalance.user_id, userId));
 
-	const [record] = await db.insert(userBalance).values(data).returning();
-	return c.json({ record });
+  if (!record) {
+    return c.json({ error: "User balance not found" }, 404);
+  }
+
+  return c.json({ record });
 });
 
-export default userPointsController;
+export default userBalanceController;
