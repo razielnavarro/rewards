@@ -77,7 +77,7 @@ pointsController.post('/add', authMiddleware, async (c) => {
 		})
 		.returning();
 
-	return c.json({ message: message, newBalance, promotionMultiplierApplied: promotionMultiplier });
+	return c.json({ message: message, newBalance, promotionMultiplierApplied: promotionMultiplier, pointsAdded: effectivePoints });
 });
 
 // Endpoint for redeeming points
