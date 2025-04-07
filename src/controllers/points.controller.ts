@@ -14,10 +14,10 @@ export const pointsController = new Hono<Env>();
 
 pointsController.post('/add', authMiddleware, async (c) => {
 	const db = drizzle(c.env.DB, { schema });
-	const jwtPayload = c.get("jwtPayload") as { idCliente: string; amount: number; message?: string};
+	const jwtPayload = c.get('jwtPayload') as { idCliente: string; amount: number; message?: string };
 	const user_id = jwtPayload.idCliente;
-	const amountSpent = jwtPayload.amount; 
-	
+	const amountSpent = jwtPayload.amount;
+
 	let basePoints = amountSpent * 100; // conversion of dollars to points
 	let multiplier = 1; // default multiplier
 
@@ -61,20 +61,19 @@ pointsController.post('/add', authMiddleware, async (c) => {
 			.returning();
 	}
 
+	const responseMessage = jwtPayload.message || 'Points added successfully';
+
 	// Record the transaction in the history table.
 	await db
 		.insert(history)
 		.values({
 			user_id,
-			description: 'Added points',
+			description: responseMessage,
 			points: effectivePoints.toString(),
 			pointsBefore: existing ? Number(existing.amount) : 0,
 			pointsAfter: newBalance,
 		})
 		.returning();
-
-		const responseMessage = jwtPayload.message || 'Points added successfully';
-
 
 	return c.json({ responseMessage, newBalance, multiplierApplied: multiplier });
 });
