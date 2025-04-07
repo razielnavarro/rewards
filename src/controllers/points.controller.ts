@@ -14,7 +14,7 @@ export const pointsController = new Hono<Env>();
 
 pointsController.post('/add', authMiddleware, async (c) => {
 	const db = drizzle(c.env.DB, { schema });
-	const jwtPayload = c.get("jwtPayload") as { idCliente: string; amount: number };
+	const jwtPayload = c.get("jwtPayload") as { idCliente: string; amount: number; message?: string};
 	const user_id = jwtPayload.idCliente;
 	const amountSpent = jwtPayload.amount; 
 	
@@ -73,7 +73,10 @@ pointsController.post('/add', authMiddleware, async (c) => {
 		})
 		.returning();
 
-	return c.json({ message: 'Points added successfully', newBalance, multiplierApplied: multiplier });
+		const responseMessage = jwtPayload.message || 'Points added successfully';
+
+
+	return c.json({ responseMessage, newBalance, multiplierApplied: multiplier });
 });
 
 // Endpoint for redeeming points
