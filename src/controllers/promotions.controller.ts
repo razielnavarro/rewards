@@ -91,13 +91,21 @@ promotionsController.patch('/:id', apiKeyMiddleware, async (c) => {
 promotionsController.delete('/:id', apiKeyMiddleware, async (c) => {
 	const db = drizzle(c.env.DB);
 	const id = c.req.param('id');
-
-	const result = await db.delete(promotions).where(eq(promotions.id, id)).returning();
-
+	
+	// Get current Unix timestamp in seconds.
+	const nowTimestamp = Math.floor(Date.now() / 1000);
+	
+	// Instead of deleting, update the record's deletedAt field.
+	const result = await db.update(promotions)
+	  .set({ deletedAt: new Date(nowTimestamp * 1000) })
+	  .where(eq(promotions.id, id))
+	  .returning();
+  
 	if (result.length === 0) {
-		return c.json({ error: 'Promotion not found' }, 404);
+	  return c.json({ error: 'Promotion not found' }, 404);
 	}
-	return c.json({ message: 'Promotion deleted successfully' });
-});
+	
+	return c.json({ message: 'Promotion soft-deleted successfully' });
+  });
 
 export default promotionsController;

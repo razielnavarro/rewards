@@ -1,0 +1,1 @@
+ALTER TABLE `promotions` ADD `deletedAt` integer DEFAULT NULL;
