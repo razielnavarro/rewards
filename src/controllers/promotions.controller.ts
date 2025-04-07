@@ -36,6 +36,9 @@ promotionsController.post('/', apiKeyMiddleware, async (c) => {
 promotionsController.get('/', apiKeyMiddleware, async (c) => {
 	const db = drizzle(c.env.DB);
 	const records = await db.select().from(promotions);
+	if (records.length === 0) {
+		return c.json({ message: 'No promotions found' });
+	}
 	return c.json({ records });
 });
 
@@ -69,6 +72,11 @@ promotionsController.patch('/:id', apiKeyMiddleware, async (c) => {
 	}
 	if (updateData.end_date !== undefined) {
 		updateData.end_date = new Date(updateData.end_date * 1000);
+	}
+
+	// Check if there are any fields to update
+	if (Object.keys(updateData).length === 0) {
+		return c.json({ error: 'No values provided to update' }, 400);
 	}
 
 	const result = await db.update(promotions).set(updateData).where(eq(promotions.id, id)).returning();
