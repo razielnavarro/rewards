@@ -68,10 +68,10 @@ userPromotionsController.get('/', authMiddleware, async (c) => {
 
 	// Extract user ID from the JWT payload.
 	const jwtPayload = c.get('jwtPayload') as { idCliente: string };
-	const userId = jwtPayload.idCliente;
+	const user_id = jwtPayload.idCliente;
 
 	// Query the active promotion for the user.
-	const [record] = await db.select().from(userPromotions).where(eq(userPromotions.user_id, userId));
+	const [record] = await db.select().from(userPromotions).where(eq(userPromotions.user_id, user_id));
 
 	if (!record) {
 		return c.json({ error: 'No active promotions found' }, 404);

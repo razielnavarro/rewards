@@ -12,10 +12,10 @@ userBalanceController.get('/', authMiddleware, async (c) => {
   
   // Get the user ID from the JWT payload
   const jwtPayload = c.get('jwtPayload') as { idCliente: string };
-  const userId = jwtPayload.idCliente;
+  const user_id = jwtPayload.idCliente;
 
   // Query the user balance
-  const [record] = await db.select().from(userBalance).where(eq(userBalance.user_id, userId));
+  const [record] = await db.select().from(userBalance).where(eq(userBalance.user_id, user_id));
 
   if (!record) {
     return c.json({ error: 'User balance not found' }, 404);
