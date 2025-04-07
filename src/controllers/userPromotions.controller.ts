@@ -63,26 +63,16 @@ userPromotionsController.post('/', authMiddleware, async (c) => {
 });
 
 // GET endpoint: Retrieve a user's active promotion by userId
-userPromotionsController.get('/:userId', authMiddleware, async (c) => {
+userPromotionsController.get('/', authMiddleware, async (c) => {
 	const db = drizzle(c.env.DB);
 
-	// Extract the user ID from the URL parameter.
-	const paramUserId = c.req.param('userId');
-
-	// Extract the user ID from the JWT payload.
+	// Extract user ID from the JWT payload.
 	const jwtPayload = c.get('jwtPayload') as { idCliente: string };
-	if (!jwtPayload) {
-		return c.json({ error: 'Unauthorized' }, 401);
-	}
-	const jwtUserId = jwtPayload.idCliente;
+	const userId = jwtPayload.idCliente;
 
-	// Ensure that the URL parameter matches the JWT user ID.
-	if (paramUserId !== jwtUserId) {
-		return c.json({ error: "Unauthorized to view another user's promotion" }, 403);
-	}
+	// Query the active promotion for the user.
+	const [record] = await db.select().from(userPromotions).where(eq(userPromotions.user_id, userId));
 
-	// Retrieve the active promotion record for this user.
-	const [record] = await db.select().from(userPromotions).where(eq(userPromotions.user_id, paramUserId));
 	if (!record) {
 		return c.json({ error: 'No active promotions found' }, 404);
 	}
