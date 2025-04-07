@@ -3,26 +3,22 @@ import { drizzle } from 'drizzle-orm/d1';
 import { Env } from '../common/types';
 import { userBalance } from '../entities/userBalance.entity';
 import { history } from '../entities/history.entity';
-import { apiKeyMiddleware } from '../middleware';
+import { apiKeyMiddleware, authMiddleware } from '../middleware';
 import { addPointsSchema, redeemPointsSchema } from '../schemas/points.schema';
-import { eq, lte, gte, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { userPromotions, promotions } from '../entities';
 
 import { schema } from '../entities';
 
 export const pointsController = new Hono<Env>();
 
-pointsController.post('/add', apiKeyMiddleware, async (c) => {
+pointsController.post('/add', authMiddleware, async (c) => {
 	const db = drizzle(c.env.DB, { schema });
-	const data = await c.req.json();
-	const parsed = addPointsSchema.safeParse(data);
-
-	if (!parsed.success) {
-		return c.json({ error: parsed.error }, 400);
-	}
-
-	const { user_id, amount } = parsed.data;
-	let basePoints = amount * 100; // conversion of dollars to points
+	const jwtPayload = c.get("jwtPayload") as { idCliente: string; amount: number };
+	const user_id = jwtPayload.idCliente;
+	const amountSpent = jwtPayload.amount; 
+	
+	let basePoints = amountSpent * 100; // conversion of dollars to points
 	let multiplier = 1; // default multiplier
 
 	const now = new Date();
