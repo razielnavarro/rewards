@@ -12,18 +12,16 @@ import { schema } from '../entities';
 
 export const pointsController = new Hono<Env>();
 
-pointsController.post('/add', authMiddleware, async (c) => {
+pointsController.post('/add', apiKeyMiddleware, async (c) => {
 	const db = drizzle(c.env.DB, { schema });
 	const data = await c.req.json();
 	const parsed = addPointsSchema.safeParse(data);
-	const jwtPayload = c.get('jwtPayload') as { idCliente: string };
-	const user_id = jwtPayload.idCliente;
 
 	if (!parsed.success) {
 		return c.json({ error: parsed.error }, 400);
 	}
 
-	const { amount, message } = parsed.data;
+	const { user_id, amount, message } = parsed.data;
 	let basePoints = amount * DOLLARS_TO_POINTS_MULTIPLIER; // conversion of dollars to points
 	let promotionMultiplier = 1; // default multiplier for promotions
 
