@@ -7,19 +7,23 @@ import { apiKeyMiddleware, authMiddleware } from '../middleware';
 import { addPointsSchema, redeemPointsSchema } from '../schemas/points.schema';
 import { eq } from 'drizzle-orm';
 import { userPromotions, promotions } from '../entities';
-
+import { DOLLARS_TO_POINTS_MULTIPLIER } from '../common/constants';
 import { schema } from '../entities';
 
 export const pointsController = new Hono<Env>();
 
 pointsController.post('/add', authMiddleware, async (c) => {
 	const db = drizzle(c.env.DB, { schema });
-	const jwtPayload = c.get('jwtPayload') as { idCliente: string; amount: number; message?: string };
-	const user_id = jwtPayload.idCliente;
-	const amountSpent = jwtPayload.amount;
+	const data = await c.req.json();
+	const parsed = addPointsSchema.safeParse(data);
 
-	let basePoints = amountSpent * 100; // conversion of dollars to points
-	let multiplier = 1; // default multiplier
+	if (!parsed.success) {
+		return c.json({ error: parsed.error }, 400);
+	}
+
+	const { user_id, amount, message } = parsed.data;
+	let basePoints = amount * DOLLARS_TO_POINTS_MULTIPLIER; // conversion of dollars to points
+	let promotionMultiplier = 1; // default multiplier for promotions
 
 	const now = new Date();
 
@@ -35,13 +39,13 @@ pointsController.post('/add', authMiddleware, async (c) => {
 		const promotion = activeUserPromotion.promotions;
 		if (promotion.start_date.getTime() <= now.getTime() && promotion.end_date.getTime() >= now.getTime()) {
 			if (promotion.promotion_category_type === 'multiplier') {
-				multiplier = promotion.amount;
+				promotionMultiplier = promotion.amount;
 			}
 		}
 	}
 
 	// Calculate effective points.
-	const effectivePoints = basePoints * multiplier;
+	const effectivePoints = basePoints * promotionMultiplier;
 
 	// Retrieve the user's current balance.
 	const [existing] = await db.select().from(userBalance).where(eq(userBalance.user_id, user_id));
@@ -61,21 +65,19 @@ pointsController.post('/add', authMiddleware, async (c) => {
 			.returning();
 	}
 
-	const responseMessage = jwtPayload.message || 'Points added successfully';
-
 	// Record the transaction in the history table.
 	await db
 		.insert(history)
 		.values({
 			user_id,
-			description: responseMessage,
+			description: 'Added points',
 			points: effectivePoints.toString(),
 			pointsBefore: existing ? Number(existing.amount) : 0,
 			pointsAfter: newBalance,
 		})
 		.returning();
 
-	return c.json({ responseMessage, newBalance, multiplierApplied: multiplier });
+	return c.json({ message: message, newBalance, promotionMultiplierApplied: promotionMultiplier });
 });
 
 // Endpoint for redeeming points
@@ -91,11 +93,24 @@ pointsController.post('/redeem', apiKeyMiddleware, async (c) => {
 	const { user_id, amount } = parsed.data;
 	const [existing] = await db.select().from(userBalance).where(eq(userBalance.user_id, user_id));
 
-	if (!existing || Number(existing.amount) < amount) {
-		return c.json({ error: 'Insufficient points' }, 400);
+	if (!existing) {
+		return c.json({ error: 'No points available for redemption' }, 400);
 	}
 
-	const newBalance = Number(existing.amount) - amount;
+	const currentBalance = Number(existing.amount);
+
+	// Check if the amount requested exceeds the current balance.
+	if (amount > currentBalance) {
+		return c.json({ error: 'Cannot redeem more points than available' }, 400);
+	}
+
+	// Enforce a minimum of 100 points to redeem.
+	if (amount < 100) {
+		return c.json({ error: 'Minimum redeemable points is 100' }, 400);
+	}
+
+	const newBalance = currentBalance - amount;
+
 	await db.update(userBalance).set({ amount: newBalance.toString() }).where(eq(userBalance.user_id, user_id));
 
 	await db
@@ -104,7 +119,7 @@ pointsController.post('/redeem', apiKeyMiddleware, async (c) => {
 			user_id,
 			description: 'Redeemed points',
 			points: amount.toString(),
-			pointsBefore: Number(existing.amount),
+			pointsBefore: currentBalance,
 			pointsAfter: newBalance,
 		})
 		.returning();
