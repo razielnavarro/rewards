@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { generateId } from '../utils/random';
-import { baseEntityColumns } from './base.entity';
+import { baseEntityColumns, softDeletableEntityColumns } from './base.entity';
 import { relations } from 'drizzle-orm';
 
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
@@ -18,5 +18,5 @@ export const promotions = sqliteTable('promotions', {
 	promotion_category_type: text(),
 	amount: integer('amount').notNull().default(1),
 	is_premium: integer('is_premium', { mode: 'boolean' }).notNull().default(false),
-	deletedAt: integer('deletedAt', { mode: 'timestamp' }).default(sql`NULL`),
+	...softDeletableEntityColumns,
 });
